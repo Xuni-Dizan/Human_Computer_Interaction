@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        nav button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        nav button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .container {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .form-row label {
+            flex: 1;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .form-row input {
+            flex: 2;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .button-row {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .available {
+            color: green;
+            font-weight: bold;
+        }
+
+        .borrowed {
+            color: red;
+            font-weight: bold;
+        }
+
+        .notification {
+            opacity: 0;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .borrow-form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .borrow-form-row label {
+            flex: 1;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .borrow-form-row input {
+            flex: 2;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #borrowDuration {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Quản lý thư viện</h1>
+</header>
+
+<nav>
+    <button onclick="showHome()">Trang chủ</button>
+    <button onclick="showBookList()">Danh mục sách</button>
+    <button onclick="showBookForm()">Thêm sách</button>
+    <button onclick="showBorrowSection()">Mượn/Trả Sách</button>
+</nav>
+
+<div id="homeSection" class="container active">
+    <h2>Chào mừng đến với hệ thống quản lý thư viện</h2>
+</div>
+
+<div id="bookListSection" class="container">
+    <h2>Danh mục sách</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Tác giả</th>
+            <th>Năm xuất bản</th>
+            <th>Thể loại</th>
+            <th>Link sách</th>
+            <th>Trạng thái</th>
+            <th>Hoạt động</th>
+        </tr>
+        </thead>
+        <tbody id="bookTableBody"></tbody>
+    </table>
+</div>
+
+<div id="addBookSection" class="container">
+    <h2>Thêm/Sửa Sách</h2>
+    <form>
+        <div class="form-row">
+            <label for="title">Tiêu đề:</label>
+            <input type="text" id="title" placeholder="Nhập tiêu đề sách">
+        </div>
+        <div class="form-row">
+            <label for="author">Tác giả:</label>
+            <input type="text" id="author" placeholder="Nhập tên tác giả">
+        </div>
+        <div class="form-row">
+            <label for="year">Năm xuất bản:</label>
+            <input type="number" id="year" placeholder="Nhập năm xuất bản">
+        </div>
+        <div class="form-row">
+            <label for="category">Thể loại:</label>
+            <input type="text" id="category" placeholder="Nhập thể loại">
+        </div>
+        <div class="form-row">
+            <label for="fileLink">Link sách:</label>
+            <input type="text" id="fileLink" placeholder="Nhập link sách">
+        </div>
+        <div class="button-row">
+            <button type="button" class="button" id="saveButton" onclick="addOrUpdateBook()">Lưu</button>
+        </div>
+    </form>
+</div>
+
+<div id="borrowSection" class="container">
+    <h2>Mượn/Trả Sách</h2>
+    <form>
+        <div class="borrow-form-row">
+            <label for="borrowTitle">Tên sách:</label>
+            <input type="text" id="borrowTitle" placeholder="Nhập tên sách">
+        </div>
+        <div class="borrow-form-row">
+            <label for="borrowAuthor">Tác giả:</label>
+            <input type="text" id="borrowAuthor" placeholder="Nhập tên tác giả">
+        </div>
+        <div class="borrow-form-row">
+            <label for="customerName">Tên khách hàng:</label>
+            <input type="text" id="customerName" placeholder="Nhập tên khách hàng">
+        </div>
+        <div class="borrow-form-row">
+            <label for="cccd">Số CCCD:</label>
+            <input type="text" id="cccd" placeholder="Nhập số CCCD (12 số)">
+        </div>
+        <div class="borrow-form-row">
+            <label for="borrowDate">Ngày mượn:</label>
+            <input type="date" id="borrowDate">
+        </div>
+        <div class="borrow-form-row">
+            <label for="borrowDuration">Thời gian mượn (ngày):</label>
+            <select id="borrowDuration">
+                <option value="7">7 ngày</option>
+                <option value="10">10 ngày</option>
+                <option value="15">15 ngày</option>
+                <option value="20">20 ngày</option>
+                <option value="25">25 ngày</option>
+                <option value="30">30 ngày</option>
+            </select>
+        </div>
+        <div class="button-row">
+            <button type="button" class="button" onclick="borrowBook()">Mượn Sách</button>
+            <button type="button" class="button" onclick="returnBook()">Trả Sách</button>
+        </div>
+    </form>
+</div>
+
+<div id="notification" class="notification"></div>
+
+<script>
+    let books = JSON.parse(localStorage.getItem('books')) || [];
+    let editingIndex = -1;
+
+    function showNotification(message) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.classList.add('show');
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    function switchSection(sectionId) {
+        const sections = document.querySelectorAll('.container');
+        sections.forEach(section => section.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    function showHome() {
+        switchSection('homeSection');
+    }
+
+    function showBookList() {
+        switchSection('bookListSection');
+        loadBookTable();
+    }
+
+    function showBookForm(index = -1) {
+        switchSection('addBookSection');
+        if (index > -1) {
+            editingIndex = index;
+            document.getElementById('title').value = books[index].title;
+            document.getElementById('author').value = books[index].author;
+            document.getElementById('year').value = books[index].year;
+            document.getElementById('category').value = books[index].category;
+            document.getElementById('fileLink').value = books[index].fileLink;
+        } else {
+            editingIndex = -1;
+            document.getElementById('title').value = '';
+            document.getElementById('author').value = '';
+            document.getElementById('year').value = '';
+            document.getElementById('category').value = '';
+            document.getElementById('fileLink').value = '';
+        }
+    }
+
+    function showBorrowSection() {
+        switchSection('borrowSection');
+    }
+
+    function loadBookTable() {
+        const bookTableBody = document.getElementById('bookTableBody');
+        bookTableBody.innerHTML = '';
+        books.forEach((book, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.year}</td>
+                <td>${book.category}</td>
+                <td><a href="${book.fileLink}" target="_blank">Xem sách</a></td>
+                <td class="${book.available ? 'available' : 'borrowed'}">${book.available ? 'Có sẵn' : 'Đã mượn'}</td>
+                <td>
+                    <button onclick="showBookForm(${index})">Sửa</button>
+                    <button onclick="deleteBook(${index})">Xóa</button>
+                </td>
+            `;
+            bookTableBody.appendChild(row);
+        });
+    }
+
+    function addOrUpdateBook() {
+        const title = document.getElementById('title').value;
+        const author = document.getElementById('author').value;
+        const year = document.getElementById('year').value;
+        const category = document.getElementById('category').value;
+        const fileLink = document.getElementById('fileLink').value;
+
+        if (title && author && year && category && fileLink) {
+            if (editingIndex > -1) {
+                books[editingIndex] = { title, author, year, category, fileLink, available: books[editingIndex].available };
+                showNotification('Sách đã được cập nhật thành công!');
+            } else {
+                books.push({ title, author, year, category, fileLink, available: true });
+                showNotification('Sách đã được thêm thành công!');
+            }
+            localStorage.setItem('books', JSON.stringify(books));
+            editingIndex = -1;
+        } else {
+            showNotification('Vui lòng điền đầy đủ thông tin!');
+        }
+        showBookList();
+    }
+
+    function borrowBook() {
+        const borrowTitle = document.getElementById('borrowTitle').value;
+        const borrowAuthor = document.getElementById('borrowAuthor').value;
+        const customerName = document.getElementById('customerName').value;
+        const cccd = document.getElementById('cccd').value;
+        const borrowDate = document.getElementById('borrowDate').value;
+        const borrowDuration = document.getElementById('borrowDuration').value;
+
+        if (borrowTitle && borrowAuthor && customerName && cccd && borrowDate && borrowDuration) {
+            const bookIndex = books.findIndex(book => book.title === borrowTitle && book.author === borrowAuthor && book.available);
+            if (bookIndex > -1) {
+                books[bookIndex].available = false;
+                localStorage.setItem('books', JSON.stringify(books));
+                showNotification('Sách đã được mượn thành công!');
+            } else {
+                showNotification('Sách không có sẵn để mượn!');
+            }
+        } else {
+            showNotification('Vui lòng điền đầy đủ thông tin!');
+        }
+
+        document.getElementById('borrowTitle').value = '';
+        document.getElementById('borrowAuthor').value = '';
+        document.getElementById('customerName').value = '';
+        document.getElementById('cccd').value = '';
+        document.getElementById('borrowDate').value = '';
+        document.getElementById('borrowDuration').value = '';
+    }
+
+    function returnBook() {
+        const borrowTitle = document.getElementById('borrowTitle').value;
+        const borrowAuthor = document.getElementById('borrowAuthor').value;
+
+        const bookIndex = books.findIndex(book => book.title === borrowTitle && book.author === borrowAuthor && !book.available);
+        if (bookIndex > -1) {
+            books[bookIndex].available = true;
+            localStorage.setItem('books', JSON.stringify(books));
+            showNotification('Sách đã được trả thành công!');
+        } else {
+            showNotification('Không tìm thấy thông tin sách để trả!');
+        }
+
+        document.getElementById('borrowTitle').value = '';
+        document.getElementById('borrowAuthor').value = '';
+    }
+
+    function deleteBook(index) {
+        books.splice(index, 1);
+        localStorage.setItem('books', JSON.stringify(books));
+        loadBookTable();
+        showNotification('Sách đã được xóa thành công!');
+    }
+
+</script>
+
+</body>
+</html>

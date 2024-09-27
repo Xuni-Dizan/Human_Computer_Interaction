@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        nav button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        nav button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .container {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Hiệu ứng cho thông báo */
+        .notification {
+            opacity: 0;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        /* Thanh tìm kiếm */
+        .search-container {
+            position: relative;
+            width: 300px;
+            margin: 20px auto;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            padding-left: 40px;
+        }
+
+        .search-container i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #888;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Button styling */
+        .button-row {
+            margin: 20px 0;
+        }
+
+        .button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Quản lý thư viện</h1>
+</header>
+
+<nav>
+    <button onclick="showHome()">Trang chủ</button>
+    <button onclick="showBookList()">Danh mục sách</button>
+    <button onclick="showBookForm()">Thêm sách</button>
+    <button onclick="showBorrowSection()">Mượn/Trả Sách</button>
+</nav>
+
+<!-- Trang chủ -->
+<div id="homeSection" class="container active">
+    <h2>Chào mừng đến với hệ thống quản lý thư viện</h2>
+</div>
+
+<!-- Danh mục sách -->
+<div id="bookListSection" class="container">
+    <h2>Danh mục sách</h2>
+
+    <!-- Thanh tìm kiếm -->
+    <div class="search-container">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchInput" oninput="searchBooks()" placeholder="Tìm kiếm theo tiêu đề, tác giả, hoặc thể loại...">
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Tác giả</th>
+            <th>Năm xuất bản</th>
+            <th>Thể loại</th>
+            <th>Link sách</th>
+            <th>Trạng thái</th>
+            <th>Hoạt động</th>
+        </tr>
+        </thead>
+        <tbody id="bookTableBody"></tbody>
+    </table>
+</div>
+
+<!-- Thêm/Sửa sách -->
+<div id="addBookSection" class="container">
+    <h2>Thêm/Sửa Sách</h2>
+    <form>
+        <div class="form-row">
+            <label for="title">Tiêu đề:</label>
+            <input type="text" id="title" placeholder="Nhập tiêu đề sách">
+        </div>
+        <div class="form-row">
+            <label for="author">Tác giả:</label>
+            <input type="text" id="author" placeholder="Nhập tên tác giả">
+        </div>
+        <div class="form-row">
+            <label for="year">Năm xuất bản:</label>
+            <input type="number" id="year" placeholder="Nhập năm xuất bản">
+        </div>
+        <div class="form-row">
+            <label for="category">Thể loại:</label>
+            <input type="text" id="category" placeholder="Nhập thể loại">
+        </div>
+        <div class="form-row">
+            <label for="fileLink">Link sách:</label>
+            <input type="text" id="fileLink" placeholder="Nhập link sách">
+        </div>
+        <div class="button-row">
+            <button type="button" class="button" onclick="addOrUpdateBook()">Lưu</button>
+        </div>
+    </form>
+</div>
+
+<!-- Mượn/Trả sách -->
+<div id="borrowSection" class="container">
+    <h2>Mượn/Trả Sách</h2>
+    <form>
+        <div class="form-row">
+            <label for="borrowTitle">Tên sách:</label>
+            <input type="text" id="borrowTitle" placeholder="Nhập tên sách">
+        </div>
+        <div class="form-row">
+            <label for="borrowAuthor">Tác giả:</label>
+            <input type="text" id="borrowAuthor" placeholder="Nhập tên tác giả">
+        </div>
+        <div class="form-row">
+            <label for="customerName">Tên khách hàng:</label>
+            <input type="text" id="customerName" placeholder="Nhập tên khách hàng">
+        </div>
+        <div class="form-row">
+            <label for="cccd">Số CCCD:</label>
+            <input type="text" id="cccd" placeholder="Nhập số CCCD (12 số)">
+        </div>
+        <div class="form-row">
+            <label for="borrowDate">Ngày mượn:</label>
+            <input type="date" id="borrowDate">
+        </div>
+        <div class="form-row">
+            <label for="borrowDuration">Thời gian mượn (ngày):</label>
+            <input type="number" id="borrowDuration" placeholder="Nhập số ngày mượn">
+        </div>
+        <div class="button-row">
+            <button type="button" class="button" onclick="borrowBook()">Mượn Sách</button>
+            <button type="button" class="button" onclick="returnBook()">Trả Sách</button>
+        </div>
+    </form>
+</div>
+
+<!-- Thông báo -->
+<div id="notification" class="notification"></div>
+
+<script>
+    let books = JSON.parse(localStorage.getItem('books')) || [];
+
+    function showNotification(message) {
+        const notification = document.getElementById('notification');
+        notification.innerText = message;
+        notification.classList.add('show');
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    function showHome() {
+        switchSection('homeSection');
+    }
+
+    function showBookList() {
+        switchSection('bookListSection');
+        renderBookList();
+    }
+
+    function showBookForm() {
+        switchSection('addBookSection');
+    }
+
+    function showBorrowSection() {
+        switchSection('borrowSection');
+    }
+
+    function switchSection(sectionId) {
+        const sections = document.querySelectorAll('.container');
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    function renderBookList() {
+        const bookTableBody = document.getElementById('bookTableBody');
+        bookTableBody.innerHTML = '';
+        books.forEach((book, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.year}</td>
+                <td>${book.category}</td>
+                <td><a href="${book.fileLink}" target="_blank">Link</a></td>
+                <td style="color: ${getColor(book.status)};">${book.status}</td>
+                <td>
+                    <button onclick="editBook(${index})">Sửa</button>
+                </td>
+            `;
+            bookTableBody.appendChild(row);
+        });
+    }
+
+    function getColor(status) {
+        switch (status) {
+            case 'Có sẵn':
+                return 'green';
+            case 'Đã mượn':
+                return 'red';
+            case 'Đã trả':
+                return 'gray';
+            default:
+                return 'black';
+        }
+    }
+
+    function addOrUpdateBook() {
+        const title = document.getElementById('title').value;
+        const author = document.getElementById('author').value;
+        const year = document.getElementById('year').value;
+        const category = document.getElementById('category').value;
+        const fileLink = document.getElementById('fileLink').value;
+
+        const bookIndex = books.findIndex(book => book.title === title && book.author === author);
+        if (bookIndex !== -1) {
+            // Sửa sách
+            books[bookIndex] = { title, author, year, category, fileLink, status: 'Có sẵn' };
+            showNotification('Cập nhật sách thành công.');
+        } else {
+            // Thêm sách
+            books.push({ title, author, year, category, fileLink, status: 'Có sẵn' });
+            showNotification('Thêm sách thành công.');
+        }
+
+        localStorage.setItem('books', JSON.stringify(books));
+        renderBookList();
+        clearBookForm();
+    }
+
+    function clearBookForm() {
+        document.getElementById('title').value = '';
+        document.getElementById('author').value = '';
+        document.getElementById('year').value = '';
+        document.getElementById('category').value = '';
+        document.getElementById('fileLink').value = '';
+    }
+
+    function editBook(index) {
+        const book = books[index];
+        document.getElementById('title').value = book.title;
+        document.getElementById('author').value = book.author;
+        document.getElementById('year').value = book.year;
+        document.getElementById('category').value = book.category;
+        document.getElementById('fileLink').value = book.fileLink;
+        switchSection('addBookSection');
+    }
+
+    function searchBooks() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filteredBooks = books.filter(book => 
+            book.title.toLowerCase().includes(query) ||
+            book.author.toLowerCase().includes(query) ||
+            book.category.toLowerCase().includes(query)
+        );
+        renderFilteredBookList(filteredBooks);
+    }
+
+    function renderFilteredBookList(filteredBooks) {
+        const bookTableBody = document.getElementById('bookTableBody');
+        bookTableBody.innerHTML = '';
+        filteredBooks.forEach((book, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.year}</td>
+                <td>${book.category}</td>
+                <td><a href="${book.fileLink}" target="_blank">Link</a></td>
+                <td style="color: ${getColor(book.status)};">${book.status}</td>
+                <td>
+                    <button onclick="editBook(${index})">Sửa</button>
+                </td>
+            `;
+            bookTableBody.appendChild(row);
+        });
+    }
+
+    function validateBorrowForm() {
+        const borrowTitle = document.getElementById('borrowTitle').value;
+        const borrowAuthor = document.getElementById('borrowAuthor').value;
+        const customerName = document.getElementById('customerName').value;
+        const cccd = document.getElementById('cccd').value;
+        const borrowDuration = parseInt(document.getElementById('borrowDuration').value);
+
+        if (!borrowTitle || !borrowAuthor || !customerName || !cccd) {
+            showNotification('Vui lòng điền đầy đủ thông tin.');
+            return false;
+        }
+        if (cccd.length !== 12 || isNaN(cccd)) {
+            showNotification('Số CCCD phải gồm 12 số.');
+            return false;
+        }
+        if (borrowDuration <= 0) {
+            showNotification('Thời gian mượn phải lớn hơn 0.');
+            return false;
+        }
+        return true;
+    }
+
+    function borrowBook() {
+        if (!validateBorrowForm()) {
+            return;
+        }
+
+        const borrowTitle = document.getElementById('borrowTitle').value;
+        const borrowAuthor = document.getElementById('borrowAuthor').value;
+        const bookIndex = books.findIndex(book => book.title === borrowTitle && book.author === borrowAuthor);
+        
+        if (bookIndex === -1) {
+            showNotification('Không tìm thấy sách để mượn.');
+            return;
+        }
+        
+        books[bookIndex].status = 'Đã mượn';
+        localStorage.setItem('books', JSON.stringify(books));
+        showNotification('Sách đã được mượn thành công.');
+        renderBookList();
+        showBookList();
+    }
+
+    // Trả sách
+    function returnBook() {
+        const borrowTitle = document.getElementById('borrowTitle').value;
+        const borrowAuthor = document.getElementById('borrowAuthor').value;
+        const bookIndex = books.findIndex(book => book.title === borrowTitle && book.author === borrowAuthor);
+        
+        if (bookIndex === -1) {
+            showNotification('Không tìm thấy sách để trả.');
+            return;
+        }
+
+        books[bookIndex].status = 'Có sẵn'; // Trạng thái trở về mặc định
+        localStorage.setItem('books', JSON.stringify(books));
+        showNotification('Sách đã được trả thành công.');
+        renderBookList();
+        showBookList();
+    }
+
+    // Khởi động hiển thị danh sách sách
+    window.onload = showHome;
+</script>
+
+<!-- Thêm Font Awesome cho icon kính lúp -->
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</body>
+</html>
