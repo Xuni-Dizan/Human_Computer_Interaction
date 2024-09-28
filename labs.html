@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labs page showcasing various projects.">
+    <meta name="keywords" content="Labs, Projects, Portfolio">
+    <title>Labs - My Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="labs.html">Labs</a></li>
+            <button class="add-lab" onclick="addLab()"> <i class="fas fa-plus"></i> Add Lab </button>
+        </ul>
+    </nav>
+
+    <!-- Labs Section -->
+    <section id="labs">
+        <div class="labs-row" id="lab-list">
+            <div class="lab-item">
+                <a href="labs/lab1.html">Lab 1</a>
+            </div>
+            <div class="lab-item">
+                <a href="labs/lab2.html">Lab 2</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 My Portfolio. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let labCount = 3;
+
+        function addLab() {
+            const labList = document.getElementById("lab-list");
+            const newLab = document.createElement("div");
+            newLab.classList.add("lab-item");
+
+            const labLink = document.createElement("a");
+            labLink.href = `labs/lab${labCount}.html`;
+            labLink.innerText = `Lab ${labCount}`;
+
+            newLab.appendChild(labLink);
+            labList.appendChild(newLab);
+
+            // Tạo trang lab với mã HTML mẫu
+            const newLabHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab ${labCount}</title>
+</head>
+<body>
+    <h1>Lab ${labCount}</h1>
+    <p>This is the code for Lab ${labCount}.</p>
+    <pre><code>&lt;!-- Add your HTML code here --&gt;</code></pre>
+</body>
+</html>`;
+
+            // Tạo một tệp HTML mới cho Lab n (giả lập trong thực tế sẽ cần tạo file vật lý)
+            const blob = new Blob([newLabHTML], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `lab${labCount}.html`;
+            link.click();
+
+            labCount++;
+        }
+    </script>
+</body>
+</html>
+
+
